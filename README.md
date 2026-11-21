@@ -1,6 +1,28 @@
-# 🤖 Autonomous Customer Support Agent (70% Resolution Benchmark)
+<div align="center">
 
-A production-grade, 100% vanilla Python autonomous support agent designed to ingest, classify, and resolve customer tickets with a granular, immutable audit trail.
+# 🤖 AutoSupport Agent AI
+### Production-Grade Autonomous Customer Support Engine
+**Engineered by [Ram Chandra Gupta](https://github.com/Chandra142)**
+
+[![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-blue.svg?logo=python&logoColor=white)](https://www.python.org/)
+[![Streamlit App](https://img.shields.io/badge/Streamlit-Live%20Dashboard-FF4B4B.svg?logo=streamlit&logoColor=white)](http://localhost:8501)
+[![Resolution Benchmark](https://img.shields.io/badge/Autonomous%20Resolution-70%25%20Benchmark-brightgreen.svg)]()
+[![Crash Rate](https://img.shields.io/badge/Crash%20Rate-0.0%25-success.svg)]()
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)]()
+
+<br/>
+
+### 🎬 Live Execution Showcase (Working Proof)
+<img src="demo/demo.gif" alt="AutoSupport Agent AI Live Working Proof" width="900"/>
+
+<br/>
+<em>Watch the agent concurrently ingest 20 tickets, execute ReAct loops, self-heal via retries, and log immutable audits in ~7.3s.</em>
+
+</div>
+
+---
+
+A production-grade, resilient autonomous support agent designed to ingest, classify, and resolve customer tickets with an immutable Write-Ahead Audit Ledger and zero LLM hallucination risk.
 
 **This is an autonomous agent engine, not a chatbot.**
 
@@ -14,12 +36,6 @@ A production-grade, 100% vanilla Python autonomous support agent designed to ing
 - **Knowledge Base Integration**: Consults `knowledge-base.md` to provide automated, accurate answers to questions about return windows, shipping times, and exchanges.
 - **Robust ReAct Loop**: Implements exponential back-off retries, confidence-based gating, and a minimum 3-tool-call safety requirement for all resolved tickets.
 - **0.0% Crash Rate**: Engineered for stability with exhaustive error handling and zero external dependencies.
-
----
-
-## 🎬 Live Working Proof
-
-![AutoSupport Agent AI Execution Demo](demo/demo.gif)
 
 ---
 
