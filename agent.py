@@ -850,6 +850,49 @@ _HANDLER_MAP: dict[str, Any] = {
 }
 
 
+def _validate_ticket_id(tid: str, customer_email: str | None) -> tuple[bool, str]:
+    """
+    Validate that the ticket ID conforms to the ticketing system format,
+    is not a placeholder/invalid token, and (if referencing an existing
+    ticket in tickets.json) matches the associated customer account.
+    """
+    if not tid or not isinstance(tid, str) or not tid.strip():
+        return False, "Ticket ID is missing or empty."
+
+    tid_clean = tid.strip()
+    tid_upper = tid_clean.upper()
+
+    # Reject placeholder/mock error keywords
+    invalid_keywords = ["WRONG", "INVALID", "FAKE", "DUMMY", "ERROR", "BAD", "UNKNOWN", "TEST-WRONG"]
+    if any(kw in tid_upper for kw in invalid_keywords):
+        return False, f"Ticket ID '{tid_clean}' contains an invalid identifier keyword."
+
+    # Must start with TKT- followed by alphanumeric characters/hyphens
+    if not re.match(r"^TKT-[A-Za-z0-9_-]+$", tid_clean):
+        return False, f"Ticket ID '{tid_clean}' does not conform to the required 'TKT-XXX' format."
+
+    # If the ID follows the standard pattern TKT-XXX (digits), verify it exists in the tickets datastore
+    if re.match(r"^TKT-\d{3,}$", tid_upper):
+        try:
+            tickets_list = T.load_json("tickets.json")
+            matching_ticket = next(
+                (t for t in tickets_list if (t.get("ticket_id") or t.get("id") or "").upper() == tid_upper),
+                None
+            )
+            if not matching_ticket:
+                return False, f"Ticket ID '{tid_clean}' was not found in the ticketing database."
+
+            if customer_email:
+                expected_email = (matching_ticket.get("customer_email") or matching_ticket.get("email") or "").lower().strip()
+                actual_email = customer_email.lower().strip()
+                if expected_email and actual_email and expected_email != actual_email:
+                    return False, f"Ticket ID '{tid_clean}' is registered to {expected_email}, but was requested with {actual_email}."
+        except Exception:
+            pass
+
+    return True, "Valid ticket ID."
+
+
 async def process_ticket(ticket: dict) -> TicketResult:
     """
     Autonomously process a single support ticket end-to-end.
@@ -873,7 +916,10 @@ async def process_ticket(ticket: dict) -> TicketResult:
     Phase 5  Guard       — enforce minimum tool call count.
     Phase 6  Finalise    — build and return the TicketResult.
     """
-    tid   = ticket["id"]
+    tid   = ticket.get("id") or ticket.get("ticket_id") or "TKT-UNKNOWN"
+    ticket["id"] = tid
+    if "customer_email" not in ticket and "email" in ticket:
+        ticket["customer_email"] = ticket["email"]
     audit: list[AuditEntry] = []
 
     _record_decision(
@@ -886,6 +932,55 @@ async def process_ticket(ticket: dict) -> TicketResult:
             "body_preview":   ticket["body"][:120],
         },
     )
+
+    # Phase 1b: Validate Ticket ID integrity
+    is_valid_id, val_reason = _validate_ticket_id(tid, ticket.get("customer_email"))
+    if not is_valid_id:
+        _record_decision(
+            audit,
+            ticket_id=tid,
+            step_name="validate_ticket_id",
+            confidence=0.0,
+            reason=f"Ticket ID validation failed: {val_reason}",
+            detail={"ticket_id": tid, "error": val_reason},
+        )
+        escalation_summary = (
+            f"INVALID TICKET ID [{tid}]\n"
+            f"Reason   : {val_reason}\n"
+            f"Customer : {ticket.get('customer_email', 'unknown')}\n"
+            f"Subject  : {ticket.get('subject', '')}\n"
+            f"Automated processing aborted. Ticket escalated to human support for identification."
+        )
+        res_msg = await _run_escalate(
+            tid,
+            summary=escalation_summary,
+            audit_reason=f"Invalid ticket identifier: {val_reason}",
+            escalation_reason="invalid_ticket_id",
+            confidence=0.0,
+            audit=audit,
+            step_name="escalate.invalid_ticket_id",
+        )
+        _record_decision(
+            audit,
+            ticket_id=tid,
+            step_name="resolution_finalised",
+            confidence=0.0,
+            reason="Ticket escalated due to invalid ticket identifier. Processing halted.",
+            detail={"final_status": "escalated", "resolution_message": res_msg},
+        )
+        return TicketResult(
+            ticket_id=tid,
+            customer_email=ticket.get("customer_email", "unknown"),
+            issue_type="general_inquiry",
+            final_confidence=0.0,
+            final_status="escalated",
+            resolution_message=res_msg,
+            successful_tool_calls=_count_successful_tool_calls(audit),
+            total_attempts=_count_tool_attempts(audit),
+            retry_count=_count_retries(audit),
+            audit_trail=audit,
+            error=val_reason,
+        )
 
     if not ticket.get("order_id"):
         body_text = ticket.get("body", "")

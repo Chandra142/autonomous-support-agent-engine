@@ -1,22 +1,22 @@
-# 🎤 Hackathon Demo Guide
+# 🎯 Project Showcase & Architecture Walkthrough
 
-This guide highlights the key moments to show during your demo to maximize your score.
+This guide highlights the core architectural capabilities and resilient autonomous behaviors to demonstrate when presenting or evaluating this agent.
 
-## 1. The "WOW" Moment: Parallelism
+## 1. High-Throughput Asynchronous Concurrency
 **Action**: Run `python main.py`
-**Talking Point**: *"Watch as the engine ingests 20 tickets simultaneously. Because it's built with asynchronous I/O and a ReAct-style loop, it handles the entire queue in under 10 seconds, including simulated latencies and retries."*
+**Demonstration**: *Watch as the engine ingests the entire ticket batch concurrently (`concurrency=5`). Powered by asynchronous I/O and an event-driven ReAct loop, it processes simulated latencies, back-offs, and retries in under 8 seconds.*
 
-## 2. The "Intelligence" Moment: Smart Recovery
-**Action**: Find `TKT-006` or `TKT-016` in the output (they show `RESOLVED`).
-**Talking Point**: *"Look at TKT-006. The customer didn't provide an Order ID. Instead of giving up, our agent autonomously looked up the customer's email, found their most recent order (ORD-1006), and resolved the cancellation request. This 'Smart Lookup' behavior boosted our autonomous resolution rate from 50% to 70%."*
+## 2. Smart Context Recovery (Missing Order ID)
+**Action**: Find `TKT-006` or `TKT-016` in the output (`RESOLVED`).
+**Key Insight**: *In real-world support, customers frequently omit order numbers. Rather than dropping or escalating immediately, the agent inspects the customer's order history, matches relevant recency/product signals, and continues execution.*
 
-## 3. The "Trust" Moment: Audit Logs
-**Action**: Run `python main.py --show-audit` and scroll to a complex ticket.
-**Talking Point**: *"In any production environment, trust is vital. Every tool call, retry, and internal decision is logged in an immutable Audit Trail. For example, here you can see the agent consulting our internal Knowledge Base to answer a return policy question automatically."*
+## 3. Verifiable Transparency & Full Audit Trail
+**Action**: Run `python main.py --show-audit` and inspect step-by-step logs.
+**Key Insight**: *Every external tool invocation, duration, confidence assessment, retry backoff, and decision reason is stored immutably. This guarantees full observability and post-incident replayability.*
 
-## 4. The "Safety" Moment: Reason-Based Escalation
-**Action**: Open `output/results.json` and show a ticket with Status `ESCALATED`.
-**Talking Point**: *"The agent knows when it's out of its depth. It never guesses. If it sees a 'Replacement Request' or encounters an 'Invalid Order ID', it escalates to a human with a clear, specific reason so they can take over immediately."*
+## 4. Safe Reason-Tagged Escalation
+**Action**: Open `output/results.json` and review tickets with `ESCALATED`.
+**Key Insight**: *Safety-critical workflows demand that an agent never hallucinate or guess. When encountering physical replacements or low confidence (<0.60), the agent flags the ticket with clear tags (`manual_fulfillment_required`, `low_confidence`) for human agents.*
 
 ---
 ### Cheat Sheet: High-Value Results to Show

@@ -17,24 +17,75 @@ A production-grade, 100% vanilla Python autonomous support agent designed to ing
 
 ---
 
+## 🏛️ System Design & Agent Graph Architecture
+
+The engine is engineered as a deterministic **Cyclic State Graph** wrapped in an asynchronous **Resiliency & Observability Harness**:
+
+```mermaid
+graph TD
+    A([📥 Ticket Ingestion]) --> B[Perception: Weighted Regex Classifier]
+    B --> C{Confidence Gate: Conf >= 0.60?}
+    
+    C -- "No" --> ESC[🚨 Human Escalation: Tagged Reason]
+    C -- "Yes" --> D{Order ID Present?}
+    
+    D -- "No" --> E[Smart Context Discovery: Order History Scan]
+    E --> F{Order Found?}
+    F -- "No" --> ESC
+    F -- "Yes" --> G[Domain Policy Dispatcher]
+    D -- "Yes" --> G
+    
+    G --> H[Tool Execution Harness]
+    H --> I{Tool Result}
+    I -- "Transient Failure" --> J[Exponential Backoff & Retry x2] --> H
+    I -- "Permanent Fail" --> ESC
+    I -- "Success" --> K{Safety Gate: Steps >= 3?}
+    K -- "No" --> L[Supplement Policy/Warranty Data] --> H
+    K -- "Yes" --> RES[✅ Autonomous Resolution: RESOLVED]
+    
+    RES & ESC --> M[(Immutable Write-Ahead Audit Log)]
+```
+
+> 📖 **Full Engineering Specification**: Read the detailed 5-plane system design, sequence diagrams, state schema, and fault-tolerance invariants in [architecture_diagram.md](architecture_diagram.md).
+
+---
+
 ## 🛠️ Setup & Execution
 
-Since the engine is built using the Python Standard Library, there are no dependencies to install.
+You can run the engine via the **CLI** or launch the **Interactive Web Application**.
 
-1. **Process the Ticket Queue:**
-   ```bash
-   python main.py
-   ```
+### Option 1: Interactive Web Dashboard (Streamlit)
+```bash
+pip install -r requirements.txt
+streamlit run app.py
+```
+*Features live batch queue execution, interactive step-by-step audit inspector, and a sandbox to test custom tickets.*
 
-2. **View the Full Audit Telemetry:**
-   ```bash
-   python main.py --show-audit
-   ```
+### Option 2: CLI High-Speed Queue Runner
+```bash
+# Process ticket queue with rich console output
+python main.py
+
+# Print full granular step-by-step audit telemetry
+python main.py --show-audit
+```
+
+---
+
+## ☁️ 1-Click Cloud Deployment (Streamlit Community Cloud)
+
+To deploy the interactive web application live on the web for free:
+
+1. Push this repository to your GitHub account (`https://github.com/Chandra142/autonomous-support-agent-engine`).
+2. Visit **[share.streamlit.io](https://share.streamlit.io)** and sign in with GitHub.
+3. Click **New App**, select your repository, set the Main file path to `app.py`, and click **Deploy!**
+4. Your agent will be live at `https://<your-custom-subdomain>.streamlit.app`.
 
 ---
 
 ## 📁 Project Structure
 
+- `app.py`: The "Face" (Interactive Streamlit Web Dashboard & Telemetry Viewer).
 - `agent.py`: The "Brain" (Orchestration, Retries, and domain handlers).
 - `classifier.py`: The "Eyes" (Heuristic keyword-weighted classification).
 - `tools.py`: The "Hands" (Mocked DBs, Mail, and Tracking services).
@@ -56,4 +107,7 @@ Since the engine is built using the Python Standard Library, there are no depend
 Check Demo Video Here >> 
 https://drive.google.com/file/d/1Jo_ZZq1YysaHnbrIls-n687Jtk2ctqy6/view?usp=sharing
 ---
-*Developed for the 2026 AI Hackathon.*
+## 👤 Author & Maintainer
+
+- **Ram Chandra Gupta** ([@Chandra142](https://github.com/Chandra142))
+- Built as an open-source, resilient autonomous customer support automation engine.

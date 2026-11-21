@@ -1,2 +1,3 @@
-# No external dependencies required!
-# This highly-resilient agent is built on 100% native Python.
+streamlit>=1.30.0
+pandas>=2.0.0
+rich>=13.0.0
