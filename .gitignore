@@ -1,5 +1,23 @@
+# Bytecode and runtime caches
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+
+# Environment & Dependencies
 venv/
 .env
-output/*.json
+.venv/
+env/
+
+# Large media files (hosted externally)
+*.mp4
+*.mov
+*.avi
+
+# Dynamic runtime outputs
+output/
+
+# OS metadata
+.DS_Store
+Thumbs.db

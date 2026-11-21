@@ -17,6 +17,12 @@ A production-grade, 100% vanilla Python autonomous support agent designed to ing
 
 ---
 
+## 🎬 Live Working Proof
+
+![AutoSupport Agent AI Execution Demo](demo/demo.gif)
+
+---
+
 ## 🏛️ System Design & Agent Graph Architecture
 
 The engine is engineered as a deterministic **Cyclic State Graph** wrapped in an asynchronous **Resiliency & Observability Harness**:
@@ -104,8 +110,10 @@ To deploy the interactive web application live on the web for free:
 - **Retry Success**: 100% of transient failures recovered internally.
 
 ---
-Check Demo Video Here >> 
-https://drive.google.com/file/d/1Jo_ZZq1YysaHnbrIls-n687Jtk2ctqy6/view?usp=sharing
+
+## 🎥 Full Video Walkthrough
+
+- **Full Walkthrough Video**: [Watch on Google Drive](https://drive.google.com/file/d/1Jo_ZZq1YysaHnbrIls-n687Jtk2ctqy6/view?usp=sharing)
 ---
 ## 👤 Author & Maintainer
 
